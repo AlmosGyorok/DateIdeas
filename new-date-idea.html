@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="hu">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Új randi ötlet</title>
+    <link rel="stylesheet" href="Style/style.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Új randi ötlet hozzáadása</h1>
+
+      <form id="ideaForm">
+        <label for="title">Program neve:</label><br />
+        <input type="text" id="title" required /><br /><br />
+
+        <label for="link">Link:</label><br />
+        <input type="url" id="link" placeholder="https://..." /><br /><br />
+
+        <label for="image">Kép feltöltése:</label><br />
+        <input type="file" id="image" accept="image/*" /><br /><br />
+
+        <button type="submit">Mentés</button>
+        <button type="button" onclick="window.location.href = 'index.html'">
+          Mégse
+        </button>
+      </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      const SUPABASE_URL = "IDE_A_PROJECT_URL";
+      const SUPABASE_ANON_KEY = "IDE_A_ANON_KEY";
+      const supabase = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
+      );
+    </script>
+    <script>
+      function safeFileName(name) {
+        return name.replace(/[^a-z0-9.\-_]/gi, "_");
+      }
+
+      async function requireLogin() {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        return session;
+      }
+
+      document
+        .getElementById("ideaForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const title = document.getElementById("title").value.trim();
+          const link = document.getElementById("link").value.trim();
+          const file = document.getElementById("image").files?.[0];
+
+          if (!title) return alert("Adj meg egy program nevet!");
+
+          const session = await requireLogin();
+          if (!session)
+            return alert(
+              "Előbb lépj be (email magic link), hogy tudj menteni.",
+            );
+
+          let image_path = null;
+
+          if (file) {
+            const userId = session.user.id;
+            const path = `${userId}/${Date.now()}_${safeFileName(file.name)}`;
+
+            const { error: uploadError } = await supabase.storage
+              .from("date-images")
+              .upload(path, file, { upsert: false });
+
+            if (uploadError) {
+              console.error(uploadError);
+              alert("Kép feltöltés nem sikerült.");
+              return;
+            }
+
+            image_path = path;
+          }
+
+          const { error: insertError } = await supabase
+            .from("date_ideas")
+            .insert([{ title, link: link || null, image_path }]);
+
+          if (insertError) {
+            console.error(insertError);
+            alert("Mentés nem sikerült.");
+            return;
+          }
+
+          window.location.href = "index.html";
+        });
+    </script>
+  </body>
+</html>

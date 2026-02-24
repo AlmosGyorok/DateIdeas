@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="hu">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gyere velem randizni Zsuzsi</title>
+    <link rel="stylesheet" href="Style/style.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>Álmos és Zsuzsi randija</h1>
+        <h2>Ötletek</h2>
+        <button onclick="window.location.href = 'new-date-idea.html'">
+          Új ötlet felvétele
+        </button>
+        <input id="email" type="email" placeholder="email" />
+        <button id="loginBtn" type="button">Belépés email linkkel</button>
+      </header>
+
+      <div class="rule"></div>
+
+      <section class="grid">
+        <article class="card">
+          <h3>
+            <a
+              class="btnlink"
+              href="https://gokartbudapest.hu/hu/"
+              target="_blank"
+            >
+              Go-Kárt ↗
+            </a>
+          </h3>
+          <img
+            src="./assets/images/Blaha-Go-Cart.jpg"
+            alt="Go-kart under Blaha Square"
+          />
+        </article>
+
+        <article class="card">
+          <h3>
+            <a
+              class="btnlink"
+              href="https://welovebudapest.com/hely/orczy-park/"
+              target="_blank"
+            >
+              Futás az Orcy Parkban ↗
+            </a>
+          </h3>
+          <img src="./assets/images/orczy-kert.jpg" alt="Orcy Park tava" />
+        </article>
+
+        <article class="card">
+          <h3>
+            <a
+              class="btnlink"
+              href="https://www.ign.com/games/reanimal"
+              target="_blank"
+            >
+              Reanimal kijátszása ↗
+            </a>
+          </h3>
+          <img
+            src="./assets/images/reanimal-title-pic.webp"
+            alt="Reanimal title picture"
+          />
+        </article>
+      </section>
+      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+      <script>
+        const SUPABASE_URL = "IDE_A_PROJECT_URL";
+        const SUPABASE_ANON_KEY = "IDE_A_ANON_KEY";
+        const supabase = window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_ANON_KEY,
+        );
+      </script>
+      <script>
+        document
+          .getElementById("loginBtn")
+          .addEventListener("click", async () => {
+            const email = document.getElementById("email").value.trim();
+            if (!email) return alert("Adj meg egy emailt!");
+
+            const { error } = await supabase.auth.signInWithOtp({ email });
+            if (error) {
+              console.error(error);
+              alert("Belépés nem sikerült.");
+              return;
+            }
+            alert("Küldtem egy belépő linket emailben.");
+          });
+      </script>
+      <script>
+        async function loadIdeas() {
+          const grid = document.querySelector(".grid");
+          grid.innerHTML = ""; // újrarajzoljuk
+
+          const { data, error } = await supabase
+            .from("date_ideas")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+          if (error) {
+            console.error(error);
+            alert("Nem sikerült betölteni az ötleteket.");
+            return;
+          }
+
+          data.forEach((idea) => {
+            const article = document.createElement("article");
+            article.className = "card";
+
+            const titleHtml = idea.link
+              ? `<a class="btnlink" href="${idea.link}" target="_blank" rel="noopener noreferrer">${idea.title} ↗</a>`
+              : `<span class="tag">${idea.title}</span>`;
+
+            let imgHtml = "";
+            if (idea.image_path) {
+              const { data: pub } = supabase.storage
+                .from("date-images")
+                .getPublicUrl(idea.image_path);
+              // getPublicUrl: public bucketnél egyszerű URL-t ad :contentReference[oaicite:5]{index=5}
+              imgHtml = `<img src="${pub.publicUrl}" alt="${idea.title}" loading="lazy" />`;
+            }
+
+            article.innerHTML = `<h3>${titleHtml}</h3>${imgHtml}`;
+            grid.appendChild(article);
+          });
+        }
+
+        loadIdeas();
+      </script>
+    </div>
+  </body>
+</html>
