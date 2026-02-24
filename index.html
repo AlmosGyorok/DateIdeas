@@ -22,55 +22,14 @@
       <div class="rule"></div>
 
       <section class="grid">
-        <article class="card">
-          <h3>
-            <a
-              class="btnlink"
-              href="https://gokartbudapest.hu/hu/"
-              target="_blank"
-            >
-              Go-Kárt ↗
-            </a>
-          </h3>
-          <img
-            src="./assets/images/Blaha-Go-Cart.jpg"
-            alt="Go-kart under Blaha Square"
-          />
-        </article>
-
-        <article class="card">
-          <h3>
-            <a
-              class="btnlink"
-              href="https://welovebudapest.com/hely/orczy-park/"
-              target="_blank"
-            >
-              Futás az Orcy Parkban ↗
-            </a>
-          </h3>
-          <img src="./assets/images/orczy-kert.jpg" alt="Orcy Park tava" />
-        </article>
-
-        <article class="card">
-          <h3>
-            <a
-              class="btnlink"
-              href="https://www.ign.com/games/reanimal"
-              target="_blank"
-            >
-              Reanimal kijátszása ↗
-            </a>
-          </h3>
-          <img
-            src="./assets/images/reanimal-title-pic.webp"
-            alt="Reanimal title picture"
-          />
-        </article>
+        <!-- Az ötletek Supabase-ből töltődnek -->
       </section>
+
       <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
       <script>
-        const SUPABASE_URL = "IDE_A_PROJECT_URL";
-        const SUPABASE_ANON_KEY = "IDE_A_ANON_KEY";
+        const SUPABASE_URL = "https://efgcpyemybfdwevnthrg.supabase.co";
+        const SUPABASE_ANON_KEY =
+          "sb_publishable_P8lgO3fRdhhbI-2LcGgMHA_or4m0a4O";
         const supabase = window.supabase.createClient(
           SUPABASE_URL,
           SUPABASE_ANON_KEY,
@@ -121,7 +80,6 @@
               const { data: pub } = supabase.storage
                 .from("date-images")
                 .getPublicUrl(idea.image_path);
-              // getPublicUrl: public bucketnél egyszerű URL-t ad :contentReference[oaicite:5]{index=5}
               imgHtml = `<img src="${pub.publicUrl}" alt="${idea.title}" loading="lazy" />`;
             }
 
