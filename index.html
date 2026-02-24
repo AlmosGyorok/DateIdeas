@@ -26,35 +26,51 @@
       </section>
 
       <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
       <script>
         const SUPABASE_URL = "https://efgcpyemybfdwevnthrg.supabase.co";
         const SUPABASE_ANON_KEY =
           "sb_publishable_P8lgO3fRdhhbI-2LcGgMHA_or4m0a4O";
+
         const supabase = window.supabase.createClient(
           SUPABASE_URL,
           SUPABASE_ANON_KEY,
         );
-      </script>
-      <script>
+
         document
           .getElementById("loginBtn")
           .addEventListener("click", async () => {
             const email = document.getElementById("email").value.trim();
-            if (!email) return alert("Adj meg egy emailt!");
+            if (!email) return alert("Adj meg egy email címet!");
 
-            const { error } = await supabase.auth.signInWithOtp({ email });
+            const { error } = await supabase.auth.signInWithOtp({
+              email,
+              options: { emailRedirectTo: window.location.href },
+            });
+
             if (error) {
               console.error(error);
               alert("Belépés nem sikerült.");
               return;
             }
+
             alert("Küldtem egy belépő linket emailben.");
           });
-      </script>
-      <script>
+
+        async function checkLogin() {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+          console.log(
+            session
+              ? `Bejelentkezve: ${session.user.email}`
+              : "Nincs bejelentkezve",
+          );
+        }
+
         async function loadIdeas() {
           const grid = document.querySelector(".grid");
-          grid.innerHTML = ""; // újrarajzoljuk
+          grid.innerHTML = "";
 
           const { data, error } = await supabase
             .from("date_ideas")
@@ -88,6 +104,7 @@
           });
         }
 
+        checkLogin();
         loadIdeas();
       </script>
     </div>
