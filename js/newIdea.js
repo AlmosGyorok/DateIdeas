@@ -37,9 +37,14 @@ document.getElementById("ideaForm").addEventListener("submit", async (e) => {
     }
   }
 
-  const { error: insertError } = await supabase
-    .from("date_ideas")
-    .insert([{ title, link: link || null, image_path }]);
+  const { error: insertError } = await supabase.from("date_ideas").insert([
+    {
+      title,
+      link: link || null,
+      image_path,
+      created_by: session.user.id,
+    },
+  ]);
 
   if (insertError) {
     console.error(insertError);
