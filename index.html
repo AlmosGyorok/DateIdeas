@@ -3,10 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Gyere velem randizni Zsuzsi</title>
+    <title>Álmos és Zsuzsi randija</title>
     <link rel="stylesheet" href="Style/style.css" />
   </head>
-
   <body>
     <div class="container">
       <header>
@@ -15,98 +14,17 @@
         <button onclick="window.location.href = 'new-date-idea.html'">
           Új ötlet felvétele
         </button>
-        <input id="email" type="email" placeholder="email" />
-        <button id="loginBtn" type="button">Belépés email linkkel</button>
       </header>
+
+      <!-- EGYETLEN auth blokk -->
+      <div id="auth"></div>
 
       <div class="rule"></div>
 
-      <section class="grid">
-        <!-- Az ötletek Supabase-ből töltődnek -->
-      </section>
+      <section class="grid"></section>
 
       <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-      <script>
-        const SUPABASE_URL = "https://efgcpyemybfdwevnthrg.supabase.co";
-        const SUPABASE_ANON_KEY =
-          "sb_publishable_P8lgO3fRdhhbI-2LcGgMHA_or4m0a4O";
-
-        const supabase = window.supabase.createClient(
-          SUPABASE_URL,
-          SUPABASE_ANON_KEY,
-        );
-
-        document
-          .getElementById("loginBtn")
-          .addEventListener("click", async () => {
-            const email = document.getElementById("email").value.trim();
-            if (!email) return alert("Adj meg egy email címet!");
-
-            const { error } = await supabase.auth.signInWithOtp({
-              email,
-              options: { emailRedirectTo: window.location.href },
-            });
-
-            if (error) {
-              console.error(error);
-              alert("Belépés nem sikerült.");
-              return;
-            }
-
-            alert("Küldtem egy belépő linket emailben.");
-          });
-
-        async function checkLogin() {
-          const {
-            data: { session },
-          } = await supabase.auth.getSession();
-          console.log(
-            session
-              ? `Bejelentkezve: ${session.user.email}`
-              : "Nincs bejelentkezve",
-          );
-        }
-
-        async function loadIdeas() {
-          const grid = document.querySelector(".grid");
-          grid.innerHTML = "";
-
-          const { data, error } = await supabase
-            .from("date_ideas")
-            .select("*")
-            .order("created_at", { ascending: false });
-
-          if (error) {
-            console.error(error);
-            alert("Nem sikerült betölteni az ötleteket.");
-            return;
-          }
-
-          data.forEach((idea) => {
-            const article = document.createElement("article");
-            article.className = "card";
-
-            const titleHtml = idea.link
-              ? `<a class="btnlink" href="${idea.link}" target="_blank" rel="noopener noreferrer">${idea.title} ↗</a>`
-              : `<span class="tag">${idea.title}</span>`;
-
-            let imgHtml = "";
-            if (idea.image_path) {
-              const { data: pub } = supabase.storage
-                .from("date-images")
-                .getPublicUrl(idea.image_path);
-              imgHtml = `<img src="${pub.publicUrl}" alt="${idea.title}" loading="lazy" />`;
-            }
-
-            article.innerHTML = `<h3>${titleHtml}</h3>${imgHtml}`;
-            grid.appendChild(article);
-          });
-        }
-
-        checkLogin();
-        loadIdeas();
-      </script>
+      <script type="module" src="js/ideas.js"></script>
     </div>
   </body>
 </html>
